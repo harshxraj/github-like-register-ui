@@ -45,7 +45,6 @@ function App() {
     }
   };
   const [step, setStep] = useState(1);
-  const [typed, setTyped] = useState(Typed | undefined);
   const inputRef = useRef([]);
 
   const [validationResults, setValidationResults] = useState({
@@ -54,7 +53,7 @@ function App() {
     hasNumber: false,
     hasSpecialChar: false,
   });
-  console.log("STEP", step);
+  console.log("STEP", validationResults);
 
   useEffect(() => {
     if (step <= questions.length) {
@@ -67,18 +66,25 @@ function App() {
       if (event.keyCode === 13) {
         const { value } = event.target;
 
-        if (step == 6) {
+        if (step === 6) {
           return;
         }
 
         if (value !== "") {
-          if (step < 4) {
-            setStep((prev) => prev + 1);
+          if (step === 4) {
+            if (
+              validationResults.hasLowercase &&
+              validationResults.hasUppercase &&
+              validationResults.hasNumber &&
+              validationResults.hasSpecialChar
+            ) {
+              setStep((prev) => prev + 1);
+              setTimeout(() => {
+                setStep((prev) => prev + 1);
+              }, 4000);
+            }
           } else {
             setStep((prev) => prev + 1);
-            setTimeout(() => {
-              setStep((prev) => prev + 1);
-            }, 2000);
           }
         }
       }
@@ -87,7 +93,7 @@ function App() {
     document.addEventListener("keydown", handleKeyDown);
 
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [step, inputRef]);
+  }, [step, inputRef, validationResults]);
 
   return (
     <div className="relative h-screen w-screen">
@@ -114,7 +120,7 @@ function App() {
             damping: 20,
             duration: 1,
           }}
-          className="mockup-code w-[600px] m-auto mt-7"
+          className="mockup-code w-[620px] m-auto mt-7"
         >
           {questions &&
             questions.map((question, index) => {
@@ -157,14 +163,13 @@ function App() {
                       {question.step == 4 && (
                         <div>
                           <pre data-prefix={"⚠️"} className="text-sm">
-                            Password must contain at least one lowercase letter,
-                            one uppercase letter, and one number. Password needs
-                            a number and lowercase letter
+                            Password needs a number, a uppercase, a lowercase
+                            and a special character
                           </pre>
-                          <div className="grid grid-cols-4 gap-4 h-2 px-10 justify-center w-full my-1">
+                          <div className="grid grid-cols-4 gap-4 h-2 px-12 justify-center w-[300px] my-1">
                             <div
                               className={`h-1 ${getColor(
-                                validationResults.hasLowercase
+                                validationResults.hasNumber
                               )}`}
                             />
                             <div
@@ -174,7 +179,7 @@ function App() {
                             />
                             <div
                               className={`h-1 ${getColor(
-                                validationResults.hasNumber
+                                validationResults.hasLowercase
                               )}`}
                             />
                             <div
@@ -227,7 +232,9 @@ function App() {
           role="alert"
           className=" text-center border border-white/30 p-3 rounded-md mt-8 w-[600px] m-auto bg-[#2a323c] text-white"
         >
-          <span>✔️ Your Account has been created!</span>
+          <span>
+            <span className="mr-2">✓</span> Your Account has been created!
+          </span>
         </motion.div>
       )}
     </div>
